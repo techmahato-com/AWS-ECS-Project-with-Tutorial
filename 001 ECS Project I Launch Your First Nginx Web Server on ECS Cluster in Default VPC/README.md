@@ -88,4 +88,4 @@ Feel free to expand this setup with additional configurations, such as integrati
 
 This guide provides a comprehensive overview of setting up and deploying an Nginx web server on ECS. If you have any specific configurations or requirements, you can adjust the steps accordingly.
 
-# GET JOB IN 4 MONTH || LEARN AWS CLOUD & DEVOPS || GENERATE 4 SOURCE OF INCOME || ASK ARVIND SIR @ 7003967266 / TECHMAHATO@GMAIL.COM
+# GET JOB IN 4 MONTH || LEARN AWS CLOUD & DEVOPS || GENERATE 4 SOURCE OF INCOME || ASK ARVIND SIR @ 7003967266 / techmahato@gmail.com
