@@ -10,111 +10,121 @@
 ## 
 
 
-# Continuous Integration and Continuous Delivery (CI/CD) Pipeline for ECS
-## Step 1: Introduction to CI/CD
-CI/CD is a methodology that enables developers to deliver code changes more frequently and reliably through automation. Continuous Integration (CI) involves automatically testing and integrating code changes into a shared repository. Continuous Delivery (CD) extends CI by automatically deploying code changes to a production-like environment.
+# CI/CD Pipeline for ECS with AWS CodePipeline
 
-Refer to the my youtube video for a detailed hands-on demonstration.
+This repository demonstrates setting up a Continuous Integration and Continuous Delivery (CI/CD) pipeline using AWS CodePipeline for deploying applications to ECS (Elastic Container Service) with separate staging and production environments, including manual approval for production deployments.
 
-## Step 2: Pre-requisites - Create Staging and Production Services in ECS
-### Create ECS Task Definition
-    - Name: ecs-cicd-nginx
-    - Container Name: ecs-cicd-nginx
-        - Important Note: Ensure the container name matches what is specified in your buildspec.yml file.
-    - Image: stacksimplify/nginxapp2:latest
-### Create ECS Services
-    - Staging ECS Service
-        - Name: staging-ecs-cicd-nginx-svc
-        - Number of Tasks: 1
-    - Production ECS Service
-        - Name: prod-ecs-cicd-nginx-svc
-        - Number of Tasks: 1
+## Table of Contents
+1. [Introduction to CI/CD](#introduction-to-cicd)
+2. [Pre-requisites - ECS Services Setup](#pre-requisites---ecs-services-setup)
+3. [Create CodeCommit Repository](#create-codecommit-repository)
+4. [Create `buildspec.yml` for CodeBuild](#create-buildspecyml-for-codebuild)
+5. [Create CodePipeline](#create-codepipeline)
+6. [Modify `index.html` and Redeploy](#modify-indexhtml-and-redeploy)
+7. [Add Manual Approval Stage](#add-manual-approval-stage)
+8. [Deploy to Production ECS Service](#deploy-to-production-ecs-service)
 
-## Step 3: Create a CodeCommit Repository
-    - Repository Name: ecs-cicd-nginx
-    - Git Credentials: Generate git credentials from the IAM service and store them securely.
+## Introduction to CI/CD
 
-Clone the Repository
-        git clone https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/ecs-cicd-nginx
+Continuous Integration (CI) and Continuous Delivery (CD) enable developers to integrate and deliver code changes more frequently and reliably through automation. CI involves automatically testing and integrating code changes into a shared repository, while CD extends CI by automatically deploying code changes to a production-like environment.
+
+## Pre-requisites - ECS Services Setup
+
+### 1. Create ECS Task Definition
+
+- **Task Definition Name:** `ecs-cicd-nginx`
+- **Container Name:** `ecs-cicd-nginx`
+  - *Important:* Ensure the container name matches the name specified in your `buildspec.yml` file.
+- **Image:** `stacksimplify/nginxapp2:latest`
+
+### 2. Create ECS Services
+
+- **Staging ECS Service:**
+  - **Service Name:** `staging-ecs-cicd-nginx-svc`
+  - **Number of Tasks:** 1
+
+- **Production ECS Service:**
+  - **Service Name:** `prod-ecs-cicd-nginx-svc`
+  - **Number of Tasks:** 1
+
+## Create CodeCommit Repository
+
+1. **Repository Name:** `ecs-cicd-nginx`
+2. **Git Credentials:** Generate git credentials from the IAM service and store them securely.
+
+### Clone the Repository
+```bash
+git clone https://git-codecommit.ap-south-1.amazonaws.com/v1/repos/ecs-cicd-nginx
+
 Add Necessary Files
-Copy the following files from the course section 06-CICD-ContinuousIntegration-ContinuousDelivery to your local repository:
+Copy the following files to your local repository:
 
-    - Dockerfile
-    - index.html
+Dockerfile
+index.html
 Commit and Push to CodeCommit
 
-        git status
-        git add .
-        git commit -am "1-Added Dockerfile and index.html"
-        git push
-V
-erify the commit on the CodeCommit repository via the AWS Management Console.
-
-## Step 4: Create buildspec.yml for CodeBuild
-### Create an ECR Repository
-        - Repository Name: ecs-cicd-nginx
-        - Note: Record the full name of the ECR repository.
-
-### Create and Update buildspec.yml
-Create a buildspec.yml file in your local ecs-cicd-nginx folder and update it as follows:
-
-        - REPOSITORY_URI: Replace with the complete ECR Repository URI.
-        - Container Name: Ensure the container name matches ecs-cicd-nginx.
+git status
+git add .
+git commit -m "1-Added Dockerfile and index.html"
+git push
 
 
-Commit and Push buildspec.yml
+Verify the commit on the CodeCommit repository via the AWS Management Console.
 
-        git status
-        git add .
-        git commit -am "2-Added buildspec.yml"
-        git push
+Create buildspec.yml for CodeBuild
+1. Create an ECR Repository
+Repository Name: ecs-cicd-nginx
+Note: Record the full name of the ECR repository.
+2. Create and Update buildspec.yml
+Create a buildspec.yml file in your local ecs-cicd-nginx folder with the following content:
 
-## Step 5: Create CodePipeline
+3. Commit and Push buildspec.yml
+git status
+git add .
+git commit -m "2-Added buildspec.yml"
+git push
 
-### Create a CodePipeline:
 
-        - Connect your CodeCommit repository as the source.
-        - Use the buildspec.yml in the CodeBuild stage.
+Create CodePipeline
+Create a CodePipeline:
 
-###  Update CodeBuild Role:
+Connect your CodeCommit repository as the source.
+Use the buildspec.yml in the CodeBuild stage.
+Update CodeBuild Role:
 
-        - Attach the policy AmazonEC2ContainerRegistryFullAccess to allow CodeBuild to push images to ECR.
+Attach the policy AmazonEC2ContainerRegistryFullAccess to allow CodeBuild to push images to ECR.
+Test Deployment:
 
-### Test Deployment:
+Access the static HTML page served by the Nginx container to verify deployment.
+Modify index.html and Redeploy
+1. Make Changes
+Update the index.html file with new content (e.g., "V2 Deployment").
 
-        - Access the static HTML page served by the Nginx container to verify deployment.
+2. Commit and Push Changes
+git status
+git commit -m "V2 Deployment"
+git push
 
-## Step 6: Modify index.html and Redeploy
-### Make Changes:
+bash
+git status
+git commit -m "V2 Deployment"
+git push
 
-        - Update the index.html file with new content (e.g., "V2 Deployment").
+3. Monitor CodePipeline
+Ensure the pipeline automatically triggers and deploys the updated application.
 
-### Commit and Push Changes:
+4. Test Deployment
+Verify the changes by accessing the updated static HTML page.
 
-        - git status
-        - git commit -am "V2 Deployment"
-        - git push
-### Monitor CodePipeline:
+Add Manual Approval Stage
+1. Create SNS Topic
+Set up an SNS topic for sending approval notifications.
+Confirm the email subscription to receive notifications.
+2. Edit Pipeline
+Add a manual approval stage in the pipeline after the staging deployment.
+Deploy to Production ECS Service
+1. Edit Pipeline
+Add a deployment stage for the production ECS service after the manual approval stage.
+2. Test Final Deployment
+After manual approval, verify that the application is deployed to the production environment.
 
-        - Ensure the pipeline automatically triggers and deploys the updated application.
-
-### Test Deployment:
-
-        - Verify the changes by accessing the updated static HTML page.
-
-## Step 7: Add Manual Approval Stage in CodePipeline
-### Create SNS Topic:
-        - Set up an SNS topic for sending approval notifications.
-        - Confirm the email subscription to receive notifications.
-
-### Edit Pipeline:
-
-        - Add a manual approval stage in the pipeline after the staging deployment.
-
-## Step 8: Deploy to Production ECS Service
-
-### Edit Pipeline:
-        - Add a deployment stage for the production ECS service after the manual approval stage.
-### Test Final Deployment:
-
-        - After manual approval, verify that the application is deployed to the production environment.
